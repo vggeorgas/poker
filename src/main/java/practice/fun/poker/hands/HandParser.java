@@ -4,6 +4,7 @@ import practice.fun.poker.Card;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +12,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static practice.fun.poker.Card.DESCENDING_COMPARATOR;
+
 public class HandParser {
 
     private List<Card> sortedCards;
 
     public HandParser(List<Card> cards) {
-        Collections.sort(cards);
+        Collections.sort(cards, DESCENDING_COMPARATOR);
         this.sortedCards = cards;
     }
 
@@ -49,13 +52,13 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         }
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (mapByCounting.size() != 2) {
             return Optional.empty();
         }
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 4) {
-                return Optional.of(new FourOfAKind(entry.getKey()));
+                return Optional.of(new FourOfAKind(entry.getKey().getValue()));
             }
         }
         return Optional.empty();
@@ -65,7 +68,7 @@ public class HandParser {
         for (int i = 0; i < sortedCards.size() - 1; i++) {
             Card nextCard = sortedCards.get(i + 1);
             Card card = sortedCards.get(i);
-            if (nextCard.getSuite() != card.getSuite()) {
+            if (!nextCard.getSuite().equals(card.getSuite())) {
                 return false;
             }
         }
@@ -74,19 +77,21 @@ public class HandParser {
 
     private static boolean isStraight(List<Card> sortedCards) {
 
-        boolean checkStraightFromOne = false;
-        if (sortedCards.get(sortedCards.size() - 1).getName().equals("a")) {
-            checkStraightFromOne = true;
-            sortedCards.remove(sortedCards.size() - 1);
+        if (sortedCards.get(0).getName().equals("a")) {
+            int nextValue = 2;
+            for (int i = 1; i < sortedCards.size() - 1; i++) {
+                if (sortedCards.get(i).getValue() != nextValue) {
+                    return false;
+                }
+                nextValue++;
+            }
+            return true;
         }
 
         for (int i = 0; i < sortedCards.size() - 1; i++) {
             Card nextCard = sortedCards.get(i + 1);
             Card card = sortedCards.get(i);
-            if (i == 0 && checkStraightFromOne && card.getValue() != 2) {
-                return false;
-            }
-            if (nextCard.getSuite() != card.getSuite()) {
+            if (nextCard.getValue() != card.getValue() - 1) {
                 return false;
             }
         }
@@ -97,18 +102,18 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         }
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (mapByCounting.size() != 2) {
             return Optional.empty();
         }
         int threeOfAKind = 0;
         int pair = 0;
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 3) {
-                threeOfAKind = entry.getKey();
+                threeOfAKind = entry.getKey().getValue();
             }
             if (entry.getValue() == 2) {
-                pair = entry.getKey();
+                pair = entry.getKey().getValue();
             }
         }
         if (threeOfAKind != 0 && pair != 0) {
@@ -144,17 +149,17 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         }
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (mapByCounting.size() != 3) {
             return Optional.empty();
         }
 
         int threeOfAKind = 0;
-        List<Integer> kickers = new LinkedList<>();
+        List<Card> kickers = new LinkedList<>();
 
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 3) {
-                threeOfAKind = entry.getKey();
+                threeOfAKind = entry.getKey().getValue();
             } else {
                 kickers.add(entry.getKey());
             }
@@ -172,21 +177,21 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         }
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (mapByCounting.size() != 3) {
             return Optional.empty();
         }
 
         int pair1 = 0;
         int pair2 = 0;
-        int kicker = 0;
+        Card kicker = null;
 
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 2) {
                 if (pair1 == 0) {
-                    pair1 = entry.getKey();
+                    pair1 = entry.getKey().getValue();
                 } else {
-                    pair2 = entry.getKey();
+                    pair2 = entry.getKey().getValue();
                 }
             }
             if (entry.getValue() == 1) {
@@ -194,7 +199,7 @@ public class HandParser {
             }
         }
 
-        if (pair1 != 0 && pair2 != 0 && kicker != 0) {
+        if (pair1 != 0 && pair2 != 0 && kicker != null) {
             return Optional.of(new TwoPair(pair1, pair2, kicker));
         } else {
             return Optional.empty();
@@ -205,16 +210,16 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         }
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         if (mapByCounting.size() != 4) {
             return Optional.empty();
         }
 
         int pair = 0;
-        List<Integer> kickers = new ArrayList<>();
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+        List<Card> kickers = new ArrayList<>();
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 2) {
-                pair = entry.getKey();
+                pair = entry.getKey().getValue();
             }
             if (entry.getValue() == 1) {
                 kickers.add(entry.getKey());
@@ -222,7 +227,6 @@ public class HandParser {
         }
 
         if (pair != 0 && kickers.size() == 3) {
-            Collections.sort(kickers);
             return Optional.of(new OnePair(pair, kickers));
         } else {
             return Optional.empty();
@@ -233,7 +237,7 @@ public class HandParser {
         if (currentOptionalHand.isPresent()) {
             return currentOptionalHand;
         } else {
-            return Optional.of(new NoCombination(sortedCards));
+            return Optional.of(new HighCard(sortedCards));
         }
     };
 }

@@ -1,6 +1,7 @@
 package practice.fun.poker;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.*;
 @Getter
 @Setter
 @Builder
+@EqualsAndHashCode(of={"value"})
 public class Card implements Comparable<Card>{
 
     public static Map<String, Integer> validNamesAndValues = new HashMap<>();
@@ -28,7 +30,15 @@ public class Card implements Comparable<Card>{
         validNamesAndValues.put("a", 14);
     }
 
-    public static Set<String> validSuites = new HashSet<>(Arrays.asList("d", "h", "c", "s"));
+    public static Map<String, String> validSuits = new HashMap<>();
+    static {
+        validSuits.put("d", "diamonds");
+        validSuits.put("h", "hearts");
+        validSuits.put("c", "clubs");
+        validSuits.put("s", "spades");
+    }
+
+    public static Comparator<Card> DESCENDING_COMPARATOR = (o1, o2) -> Integer.compare(o2.getValue(), o1.getValue());
 
     private final int value;
     private final String name;
@@ -44,6 +54,6 @@ public class Card implements Comparable<Card>{
     }
 
     public static boolean isValidSuite(String suiteToCheck) {
-        return validSuites.contains(suiteToCheck);
+        return validSuits.containsKey(suiteToCheck);
     }
 }

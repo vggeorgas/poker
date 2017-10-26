@@ -8,14 +8,14 @@ import java.util.List;
 public interface Hand extends Comparable<Hand> {
     int getRank();
 
-    List<Integer> getKickers();
+    List<Card> getKickers();
 
-    default int compareKickers(List<Integer> anotherCombinationKicker) {
+    default int compareKickers(List<Card> anotherCombinationKicker) {
         for (int i = 0; i < this.getKickers().size(); i++) {
-            if (this.getKickers().get(i) > anotherCombinationKicker.get(i)) {
+            if (this.getKickers().get(i).getValue() > anotherCombinationKicker.get(i).getValue()) {
                 return 1;
             }
-            if (this.getKickers().get(i) < anotherCombinationKicker.get(i)) {
+            if (this.getKickers().get(i).getValue() < anotherCombinationKicker.get(i).getValue()) {
                 return -1;
             }
         }

@@ -59,12 +59,35 @@ public class Game {
                         && Card.isValidCardName(cardString.substring(0, 1))
                         && Card.isValidSuite(cardString.substring(1))
                 )
-                .map(cardString -> {
-                    return Card.builder()
-                            .name(cardString.substring(0, 1))
-                            .suite(cardString.substring(1))
-                            .value(Card.validNamesAndValues.get(cardString.substring(0, 1)))
-                            .build();
-                }).collect(Collectors.toList());
+                .map(cardString -> Card.builder()
+                        .name(cardString.substring(0, 1))
+                        .suite(cardString.substring(1))
+                        .value(Card.validNamesAndValues.get(cardString.substring(0, 1)))
+                        .build()).collect(Collectors.toList());
+    }
+
+    public int play(String leftHandString, String rightHandString) {
+        List<Card> leftHandCards = getCardsFromInput(leftHandString);
+        List<Card> rightHandCards = getCardsFromInput(rightHandString);
+
+        HandParser parserForLeftHand = new HandParser(leftHandCards);
+        Hand leftHand = parserForLeftHand.parse();
+
+        HandParser parserForRightHand = new HandParser(rightHandCards);
+        Hand rightHand = parserForRightHand.parse();
+
+        return play(leftHand, rightHand);
+    }
+
+    public int play(Hand leftHand, Hand rightHand) {
+        int result = leftHand.compareTo(rightHand);
+        if (result > 0) {
+            System.out.println("Left hand: "+ leftHand + " wins Right hand: "+ rightHand);
+        } else if (result < 0) {
+            System.out.println("Right hand: "+ rightHand + " wins Left hand: "+ leftHand);
+        } else {
+            System.out.println("Left hand: "+ leftHand + " ties with Right hand: "+ rightHand);
+        }
+        return result;
     }
 }

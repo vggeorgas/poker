@@ -1,19 +1,25 @@
 package practice.fun.poker.hands;
 
 import lombok.Getter;
+import practice.fun.poker.Card;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static practice.fun.poker.Card.DESCENDING_COMPARATOR;
 
 @Getter
 public class ThreeOfAKind implements Hand {
 
-    private static final int RANK = 6;
+    private static final int RANK = 4;
     private final int value;
-    private final List<Integer> kickers;
+    private final List<Card> kickers;
 
-    public ThreeOfAKind(int value, List<Integer> kickers) {
+    public ThreeOfAKind(int value, List<Card> kickers) {
         this.value = value;
         this.kickers = kickers;
+        Collections.sort(kickers, DESCENDING_COMPARATOR);
     }
 
     @Override
@@ -22,7 +28,7 @@ public class ThreeOfAKind implements Hand {
     }
 
     @Override
-    public List<Integer> getKickers() {
+    public List<Card> getKickers() {
         return this.kickers;
     }
 
@@ -38,5 +44,11 @@ public class ThreeOfAKind implements Hand {
         } else {
             return Integer.compare(RANK, o.getRank());
         }
+    }
+
+    @Override
+    public String toString() {
+        String prettyCardsFormat = kickers.stream().map(card -> card.getName()).collect(Collectors.joining(", "));
+        return String.format("Three of a kind of %s with kickers [%s]", value, prettyCardsFormat);
     }
 }

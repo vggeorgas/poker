@@ -1,20 +1,22 @@
 package practice.fun.poker.hands;
 
 import lombok.Getter;
+import practice.fun.poker.Card;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class TwoPair implements Hand {
 
-    private static final int RANK = 7;
+    private static final int RANK = 3;
 
-    private final List<Integer> kicker;
+    private final List<Card> kicker;
     private final int bigPair;
     private final int smallPair;
 
-    public TwoPair(int pair1, int pair2, Integer kicker) {
+    public TwoPair(int pair1, int pair2, Card kicker) {
         if (pair1 > pair2) {
             bigPair = pair1;
             smallPair = pair2;
@@ -32,7 +34,7 @@ public class TwoPair implements Hand {
     }
 
     @Override
-    public List<Integer> getKickers() {
+    public List<Card> getKickers() {
         return this.kicker;
     }
 
@@ -54,9 +56,14 @@ public class TwoPair implements Hand {
                 return -1;
             }
 
-            return Integer.compare(this.getKickers().get(0), anotherTwoPair.getKickers().get(0));
+            return Integer.compare(this.getKickers().get(0).getValue(), anotherTwoPair.getKickers().get(0).getValue());
         } else {
             return Integer.compare(RANK, o.getRank());
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Two pairs of %s and %s with kickers %s", bigPair, smallPair,  kicker.get(0).getValue());
     }
 }
