@@ -34,6 +34,17 @@ public class GameTest {
     }
 
     @Test
+    public void testHighCardResolvesWithOtherHighCardsCorrectly() {
+        String highCardWithBetterTopKicker = "3c 5d 2s kc 8c";
+        String highCardWithBetterMiddleKicker = "3c 5d 4s tc 8c";
+        String highCardTie = highCard;
+
+        assertThat(game.play(highCard, highCardWithBetterTopKicker), equalTo(-1));
+        assertThat(game.play(highCard, highCardWithBetterMiddleKicker), equalTo(-1));
+        assertThat(game.play(highCard, highCardTie), equalTo(0));
+    }
+
+    @Test
     public void testOnePairWinsHichCardAndLosesToAllOtherCombinations() {
 
         assertThat(game.play(onePair, highCard), equalTo(1));
@@ -44,6 +55,19 @@ public class GameTest {
         assertThat(game.play(onePair, fullHouse), equalTo(-1));
         assertThat(game.play(onePair, fourOfAKind), equalTo(-1));
         assertThat(game.play(onePair, straightFlush), equalTo(-1));
+    }
+
+    @Test
+    public void testHighCardResolvesWithOtherOnePairsCorrectly() {
+        String onePairWithBetterTopKicker = "3c 3s 2s ac 8c";
+        String onePairWithWorstTopKicker = "3c 3s 2s 9c 8c";
+        String onePairWithBetterMiddleKicker = "3c 3s 2s tc 9c";
+        String oneEqualPair = "3c 3s 2s tc 8c";
+
+        assertThat(game.play(onePair, onePairWithBetterTopKicker), equalTo(-1));
+        assertThat(game.play(onePair, onePairWithWorstTopKicker), equalTo(1));
+        assertThat(game.play(onePair, onePairWithBetterMiddleKicker), equalTo(-1));
+        assertThat(game.play(onePair, oneEqualPair), equalTo(0));
     }
 
     @Test
