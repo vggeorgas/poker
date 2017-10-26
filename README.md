@@ -1,2 +1,3 @@
 # poker
-Poker Hand Resolver
+Compares poker hands and finds the winner!!!
+
