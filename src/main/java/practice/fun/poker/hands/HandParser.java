@@ -1,68 +1,67 @@
-package practice.fun.poker.combinations;
-
+package practice.fun.poker.hands;
 
 import practice.fun.poker.Card;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CombinationFactory {
+public class HandParser {
 
-    public static Combination createCombination(List<Card> cards) {
+    private List<Card> sortedCards;
+
+    public HandParser(List<Card> cards) {
         Collections.sort(cards);
-        Optional<? extends Combination> combination = parseStraightFlush(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseFourOfAKind(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseFullHouse(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseFlush(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseStraight(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseThreeOfAKind(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseTwoPairs(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        combination = parseOnePair(cards);
-        if (combination.isPresent()) {
-            return combination.get();
-        }
-
-        return new NoCombination(cards);
+        this.sortedCards = cards;
     }
 
+    public Hand parse() {
+        return straightFlushParser
+                .andThen(fourOfAKindParser)
+                .andThen(fullHouseParser)
+                .andThen(flushParser)
+                .andThen(straightParser)
+                .andThen(threeOfAKindParser)
+                .andThen(twoPairParser)
+                .andThen(onePairParser)
+                .andThen(noCombinationParser)
+                .apply(Optional.empty())
+                .get();
+    }
 
-    private static Optional<StraightFlush> parseStraightFlush(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> straightFlushParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         if (isFlush(sortedCards) && isStraight(sortedCards)) {
             return Optional.of(new StraightFlush(sortedCards));
         } else {
             return Optional.empty();
         }
-    }
+    };
 
-    private static boolean isFlush (List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> fourOfAKindParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
+        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
+        if (mapByCounting.size() != 2) {
+            return Optional.empty();
+        }
+        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
+            if (entry.getValue() == 4) {
+                return Optional.of(new FourOfAKind(entry.getKey()));
+            }
+        }
+        return Optional.empty();
+    };
+
+    private static boolean isFlush(List<Card> sortedCards) {
         for (int i = 0; i < sortedCards.size() - 1; i++) {
             Card nextCard = sortedCards.get(i + 1);
             Card card = sortedCards.get(i);
@@ -73,10 +72,10 @@ public class CombinationFactory {
         return true;
     }
 
-    private static boolean isStraight (List<Card> sortedCards) {
+    private static boolean isStraight(List<Card> sortedCards) {
 
         boolean checkStraightFromOne = false;
-        if (sortedCards.get(sortedCards.size()-1).getName().equals("a")) {
+        if (sortedCards.get(sortedCards.size() - 1).getName().equals("a")) {
             checkStraightFromOne = true;
             sortedCards.remove(sortedCards.size() - 1);
         }
@@ -94,21 +93,10 @@ public class CombinationFactory {
         return true;
     }
 
-    private static Optional<FourOfAKind> parseFourOfAKind(List<Card> sortedCards) {
-        Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
-        if (mapByCounting.size() != 2) {
-            return Optional.empty();
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> fullHouseParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
         }
-        for (Map.Entry<Integer, Long> entry : mapByCounting.entrySet()) {
-            if (entry.getValue() == 4) {
-                return Optional.of(new FourOfAKind(entry.getKey()));
-            }
-        }
-        return Optional.empty();
-
-    }
-
-    private static Optional<FullHouse> parseFullHouse(List<Card> sortedCards) {
         Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
         if (mapByCounting.size() != 2) {
             return Optional.empty();
@@ -128,25 +116,34 @@ public class CombinationFactory {
         } else {
             return Optional.empty();
         }
-    }
+    };
 
-    private static Optional<Flush> parseFlush(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> flushParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         if (isFlush(sortedCards)) {
             return Optional.of(new Flush(sortedCards));
         } else {
             return Optional.empty();
         }
-    }
+    };
 
-    private static Optional<Straight> parseStraight(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> straightParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         if (isStraight(sortedCards)) {
             return Optional.of(new Straight(sortedCards));
         } else {
             return Optional.empty();
         }
-    }
+    };
 
-    private static Optional<ThreeOfAKind> parseThreeOfAKind(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> threeOfAKindParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
         if (mapByCounting.size() != 3) {
             return Optional.empty();
@@ -169,9 +166,12 @@ public class CombinationFactory {
         }
 
         return Optional.empty();
-    }
+    };
 
-    private static Optional<TwoPair> parseTwoPairs(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> twoPairParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
         if (mapByCounting.size() != 3) {
             return Optional.empty();
@@ -199,9 +199,12 @@ public class CombinationFactory {
         } else {
             return Optional.empty();
         }
-    }
+    };
 
-    private static Optional<OnePair> parseOnePair(List<Card> sortedCards) {
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> onePairParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        }
         Map<Integer, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Card::getValue, Collectors.counting()));
         if (mapByCounting.size() != 4) {
             return Optional.empty();
@@ -224,5 +227,13 @@ public class CombinationFactory {
         } else {
             return Optional.empty();
         }
-    }
+    };
+
+    private Function<Optional<? extends Hand>, Optional<? extends Hand>> noCombinationParser = (currentOptionalHand) -> {
+        if (currentOptionalHand.isPresent()) {
+            return currentOptionalHand;
+        } else {
+            return Optional.of(new NoCombination(sortedCards));
+        }
+    };
 }

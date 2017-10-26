@@ -38,4 +38,12 @@ public class Card implements Comparable<Card>{
     public int compareTo(Card o) {
         return Integer.compare(value, o.getValue());
     }
+
+    public static boolean isValidCardName(String nameToCheck) {
+        return validNamesAndValues.containsKey(nameToCheck);
+    }
+
+    public static boolean isValidSuite(String suiteToCheck) {
+        return validSuites.contains(suiteToCheck);
+    }
 }
