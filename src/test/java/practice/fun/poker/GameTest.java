@@ -125,7 +125,7 @@ public class GameTest {
     }
 
     @Test
-    public void testWinsEverything() {
+    public void testStraightFlushWinsEverything() {
 
         assertThat(game.play(straightFlush, highCard), equalTo(1));
         assertThat(game.play(straightFlush, onePair), equalTo(1));
