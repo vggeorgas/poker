@@ -24,8 +24,7 @@ public class Game {
             System.exit(0);
         }
 
-        HandParser parserForLeftHand = new HandParser(leftHandCards);
-        Hand leftHand = parserForLeftHand.parse();
+        Hand leftHand = HandParser.parse(leftHandCards);
 
 
         System.out.println("Enter right hand");
@@ -38,8 +37,7 @@ public class Game {
             System.exit(0);
         }
 
-        HandParser parserForRightHand = new HandParser(rightHandCards);
-        Hand rightHand = parserForRightHand.parse();
+        Hand rightHand = HandParser.parse(rightHandCards);
 
         System.out.println("Left hand: " + firstLine + ", right hand: " + secondLine);
 
@@ -70,11 +68,8 @@ public class Game {
         List<Card> leftHandCards = getCardsFromInput(leftHandString);
         List<Card> rightHandCards = getCardsFromInput(rightHandString);
 
-        HandParser parserForLeftHand = new HandParser(leftHandCards);
-        Hand leftHand = parserForLeftHand.parse();
-
-        HandParser parserForRightHand = new HandParser(rightHandCards);
-        Hand rightHand = parserForRightHand.parse();
+        Hand leftHand = HandParser.parse(leftHandCards);
+        Hand rightHand = HandParser.parse(rightHandCards);
 
         return play(leftHand, rightHand);
     }
