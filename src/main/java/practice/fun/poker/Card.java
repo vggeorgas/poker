@@ -49,11 +49,11 @@ public class Card implements Comparable<Card>{
         return Integer.compare(value, o.getValue());
     }
 
-    public static boolean isValidCardName(String nameToCheck) {
+    static boolean isValidCardName(String nameToCheck) {
         return validNamesAndValues.containsKey(nameToCheck);
     }
 
-    public static boolean isValidSuite(String suiteToCheck) {
+    static boolean isValidSuite(String suiteToCheck) {
         return validSuits.containsKey(suiteToCheck);
     }
 }

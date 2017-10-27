@@ -4,7 +4,6 @@ import practice.fun.poker.Card;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -56,12 +55,22 @@ public class HandParser {
         if (mapByCounting.size() != 2) {
             return Optional.empty();
         }
+
+        Card fourOfAKind = null;
+        Card kicker = null;
         for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
             if (entry.getValue() == 4) {
-                return Optional.of(new FourOfAKind(entry.getKey().getValue()));
+                fourOfAKind = entry.getKey();
+            }
+            if (entry.getValue() == 1) {
+                kicker = entry.getKey();
             }
         }
-        return Optional.empty();
+        if (fourOfAKind != null && kicker != null) {
+            return Optional.of(new FourOfAKind(fourOfAKind, kicker));
+        } else {
+            return Optional.empty();
+        }
     };
 
     private static boolean isFlush(List<Card> sortedCards) {
@@ -76,18 +85,10 @@ public class HandParser {
     }
 
     private static boolean isStraight(List<Card> sortedCards) {
+        return isStraightFromAceToFive(sortedCards) || isStraightHigherThanFive(sortedCards);
+    }
 
-        if (sortedCards.get(0).getName().equals("a")) {
-            int nextValue = 2;
-            for (int i = 1; i < sortedCards.size() - 1; i++) {
-                if (sortedCards.get(i).getValue() != nextValue) {
-                    return false;
-                }
-                nextValue++;
-            }
-            return true;
-        }
-
+    private static boolean isStraightHigherThanFive(List<Card> sortedCards) {
         for (int i = 0; i < sortedCards.size() - 1; i++) {
             Card nextCard = sortedCards.get(i + 1);
             Card card = sortedCards.get(i);
@@ -96,6 +97,20 @@ public class HandParser {
             }
         }
         return true;
+    }
+
+    private static boolean isStraightFromAceToFive(List<Card> sortedCards) {
+        if (sortedCards.get(0).getName().equals("a") && sortedCards.get(1).getValue() == 5) {
+            int nextValue = 5;
+            for (int i = 1; i < sortedCards.size() - 1; i++) {
+                if (sortedCards.get(i).getValue() != nextValue) {
+                    return false;
+                }
+                nextValue--;
+            }
+            return true;
+        }
+        return false;
     }
 
     private Function<Optional<? extends Hand>, Optional<? extends Hand>> fullHouseParser = (currentOptionalHand) -> {

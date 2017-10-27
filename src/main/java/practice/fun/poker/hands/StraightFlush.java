@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static practice.fun.poker.Card.DESCENDING_COMPARATOR;
+import static practice.fun.poker.Card.validNamesAndValues;
 
 @Getter
 public class StraightFlush implements Hand {
@@ -34,7 +35,9 @@ public class StraightFlush implements Hand {
     public int compareTo(Hand o) {
         if (o instanceof StraightFlush) {
             StraightFlush anotherStraightFlush = (StraightFlush) o;
-            return compareCards(this.cards, anotherStraightFlush.getCards());
+            int valueToCompare = isLowest(this) ? 5 : this.cards.get(0).getValue();
+            int valueToCompareFormAnotherStraight = isLowest(anotherStraightFlush) ? 5 : anotherStraightFlush.getCards().get(0).getValue();
+            return Integer.compare(valueToCompare, valueToCompareFormAnotherStraight);
         } else {
             return Integer.compare(RANK, o.getRank());
         }
@@ -50,5 +53,10 @@ public class StraightFlush implements Hand {
         }
         String suit = Card.validSuits.get(cards.get(0).getSuite());
         return String.format("Straight Flush of %s: [%s]", suit, prettyCardsFormat);
+    }
+
+    private boolean isLowest(StraightFlush straightFlush) {
+        return  (straightFlush.getCards().get(0).getValue() == validNamesAndValues.get("a")
+                && straightFlush.getCards().get(1).getValue() == validNamesAndValues.get("5")) ? true : false;
     }
 }
