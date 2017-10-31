@@ -6,12 +6,38 @@ import practice.fun.poker.Card;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Getter
 public class FullHouse implements Hand {
 
     private static final int RANK = 7;
+
+    static Function<List<Card>, Optional<? extends Hand>> parser = (sortedCards) -> {
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        if (mapByCounting.size() != 2) {
+            return Optional.empty();
+        }
+        int threeOfAKind = 0;
+        int pair = 0;
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
+            if (entry.getValue() == 3) {
+                threeOfAKind = entry.getKey().getValue();
+            }
+            if (entry.getValue() == 2) {
+                pair = entry.getKey().getValue();
+            }
+        }
+        if (threeOfAKind != 0 && pair != 0) {
+            return Optional.of(new FullHouse(threeOfAKind, pair));
+        } else {
+            return Optional.empty();
+        }
+    };
+
     private final int threeOfAKind;
     private final int pair;
 

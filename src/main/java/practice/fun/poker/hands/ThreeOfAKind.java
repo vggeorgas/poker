@@ -4,7 +4,11 @@ import lombok.Getter;
 import practice.fun.poker.Card;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static practice.fun.poker.Card.DESCENDING_COMPARATOR;
@@ -13,6 +17,34 @@ import static practice.fun.poker.Card.DESCENDING_COMPARATOR;
 public class ThreeOfAKind implements Hand {
 
     private static final int RANK = 4;
+
+    static Function<List<Card>, Optional<? extends Hand>> parser = (sortedCards) -> {
+
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        if (mapByCounting.size() != 3) {
+            return Optional.empty();
+        }
+
+        int threeOfAKind = 0;
+        List<Card> kickers = new LinkedList<>();
+
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
+            if (entry.getValue() == 3) {
+                threeOfAKind = entry.getKey().getValue();
+            } else {
+                kickers.add(entry.getKey());
+            }
+        }
+
+        if (threeOfAKind != 0 && kickers.size() == 2) {
+            Collections.sort(kickers);
+            return Optional.of(new ThreeOfAKind(threeOfAKind, kickers));
+        }
+
+        return Optional.empty();
+    };
+
+
     private final int value;
     private final List<Card> kickers;
 

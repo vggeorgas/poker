@@ -5,12 +5,45 @@ import practice.fun.poker.Card;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Getter
 public class TwoPair implements Hand {
 
     private static final int RANK = 3;
+
+    static Function<List<Card>, Optional<? extends Hand>> parser = (sortedCards) -> {
+        Map<Card, Long> mapByCounting = sortedCards.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        if (mapByCounting.size() != 3) {
+            return Optional.empty();
+        }
+
+        int pair1 = 0;
+        int pair2 = 0;
+        Card kicker = null;
+
+        for (Map.Entry<Card, Long> entry : mapByCounting.entrySet()) {
+            if (entry.getValue() == 2) {
+                if (pair1 == 0) {
+                    pair1 = entry.getKey().getValue();
+                } else {
+                    pair2 = entry.getKey().getValue();
+                }
+            }
+            if (entry.getValue() == 1) {
+                kicker = entry.getKey();
+            }
+        }
+
+        if (pair1 != 0 && pair2 != 0 && kicker != null) {
+            return Optional.of(new TwoPair(pair1, pair2, kicker));
+        } else {
+            return Optional.empty();
+        }
+    };
 
     private final List<Card> kicker;
     private final int bigPair;
